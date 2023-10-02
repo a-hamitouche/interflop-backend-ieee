@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #include "common/printf_specifier.h"
 #include "interflop/common/float_const.h"
 #include "interflop/fma/interflop_fma.h"
@@ -34,6 +35,21 @@
 #include "interflop/iostream/logger.h"
 #include "interflop_ieee.h"
 
+#if defined(VECT512)
+#include "x86_64/interflop_vector_ieee_avx512.h"
+#endif
+
+#if defined(VECT256)
+#include "x86_64/interflop_vector_ieee_avx.h"
+#endif
+
+#if defined(VECT128)
+#include "x86_64/interflop_vector_ieee_sse.h"
+#endif
+
+#if defined(SCALAR)
+#include "x86_64/interflop_vector_ieee_scalar.h"
+#endif
 typedef enum {
   KEY_DEBUG = 'd',
   KEY_DEBUG_BINARY = 'b',
@@ -419,8 +435,10 @@ void _ieee_alloc_context(void **context) {
 }
 
 static void _ieee_init_context(ieee_context_t *context) {
-  context->debug = false;
-  context->debug_binary = false;
+  // context->debug = false;
+  // context->debug_binary = false;
+  context->debug = true;
+  context->debug_binary = true;
   context->no_backend_name = false;
   context->print_new_line = false;
   context->print_subnormal_normalized = false;
@@ -569,7 +587,13 @@ struct interflop_backend_interface_t INTERFLOP_IEEE_API(init)(void *context) {
     interflop_enter_function : NULL,
     interflop_exit_function : NULL,
     interflop_user_call : NULL,
-    interflop_finalize : INTERFLOP_IEEE_API(finalize)
+    interflop_finalize : INTERFLOP_IEEE_API(finalize),
+    vbackend : {
+      scalar : interflop_vector_ieee_init_scalar (ctx),
+      vector128 : interflop_vector_ieee_init_sse (ctx),
+      vector256 : interflop_vector_ieee_init_avx (ctx),
+      vector512 : interflop_vector_ieee_init_avx512 (ctx)
+    }
   };
 
   return interflop_backend_ieee;
