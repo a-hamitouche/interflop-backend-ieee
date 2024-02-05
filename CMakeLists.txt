@@ -30,6 +30,7 @@ add_library(interflop_ieee_avx512    OBJECT ${INTERFLOP_VIEEE_SRC})
 target_compile_definitions(interflop_ieee_avx512 PRIVATE  ${CRT_COMPILE_DEFINITIONS} "VECT512")
 target_compile_options (interflop_ieee_avx512 PRIVATE ${CRT_PREPROCESS_OPTIONS} ${CRT_COMPILE_OPTIONS} "-mavx512f")
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 add_library (interflop_ieee SHARED  $<TARGET_OBJECTS:interflop_ieee_base>
                                     $<TARGET_OBJECTS:interflop_ieee_scalar>
                                     $<TARGET_OBJECTS:interflop_ieee_sse>
